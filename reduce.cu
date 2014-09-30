@@ -31,7 +31,6 @@ __global__ void reduceContiguous(int *d_in, int *d_out) {
 	}
 }
 
-
 /**
  * A parallel reduce where each array element is added to it's adjacent result
  * Eg: [ 1 2 3 4 5 6 7 8 ]
@@ -50,7 +49,7 @@ __global__ void reduceInterleaving(int *d_in, int *d_out) {
 	__syncthreads();
 
 	for (int i = 1, v = 2; i < blockDim.x; i *= 2, v *= 2) {
-		if ( (tid % (v)) == 0 )
+		if ((tid % (v)) == 0)
 			sdata[tid] += sdata[tid + i];
 		__syncthreads();
 	}
@@ -59,7 +58,6 @@ __global__ void reduceInterleaving(int *d_in, int *d_out) {
 		*d_out = sdata[0];
 	}
 }
-
 
 /**
  * Driver function to allocate/initialize all the memory and free it
@@ -81,10 +79,11 @@ void _callReduce(bool contiguous) {
 
 	GpuTimer timr;
 	timr.Start();
-	if (contiguous)
+	if (contiguous) {
 		reduceContiguous<<<1, N, sizeof(h_in)>>>(d_in, d_out);
-		else
+	} else {
 		reduceInterleaving<<<1, N, sizeof(h_in)>>>(d_in, d_out);
+	}
 
 	cudaMemcpy(&h_out, d_out, sizeof(h_out), cudaMemcpyDeviceToHost);
 	timr.Stop();
@@ -95,7 +94,6 @@ void _callReduce(bool contiguous) {
 	cudaFree(d_in);
 	cudaFree(d_out);
 }
-
 
 void callReduceContiguous() {
 	_callReduce(true);
